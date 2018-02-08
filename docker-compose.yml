@@ -1,0 +1,6 @@
+app:
+  build: .
+  volumes:
+    - .:/opt
+    - ~/.aws:/root/.aws
+  

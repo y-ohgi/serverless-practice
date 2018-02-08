@@ -1,4 +1,8 @@
-FROM node:9.5-alpine
+FROM amazonlinux:2
 
-RUN npm install -g yarn && \
-    npm install -g serverless
+RUN curl --silent --location https://rpm.nodesource.com/setup_9.x | bash - && \
+    yum install -y nodejs awscli jq && \
+    npm install -g yarn && \
+    npm install -g serverless 
+
+WORKDIR /opt
