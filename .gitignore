@@ -134,3 +134,7 @@ typings/
 
 
 # End of https://www.gitignore.io/api/node,emacs,serverless
+
+# おまじない
+config
+credentials
