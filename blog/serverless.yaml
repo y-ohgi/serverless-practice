@@ -1,0 +1,99 @@
+service: blog
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: ${opt:stage, self:custom.defaultStage}
+  region: ap-northeast-1
+
+custom:
+  defaultStage: dev
+  # otherfile:
+    # environment:
+    #   dev: ${file(./conf/dev.yml)}
+    #   prd: ${file(./conf/prd.yml)}
+  dynamodb:
+    start:
+      port: 8000
+      # inMemory: true
+      # migrate: true
+    #   seed: true
+    # seed:
+    #   development:
+    #     sources:
+    #       - table: blogs
+    #         sources: [./offline/seed/blogs.json]
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb-local
+
+functions:
+  ping:
+    handler: handler.hello
+    events:
+      - http:
+          path: /ping
+          method: get
+
+  blogsIndex:
+    handler: src/functions/blogs.index
+    events:
+      - http:
+          path: /blogs
+          method: get
+
+  blogsView:
+    handler: src/functions/blogs.view
+    events:
+      - http:
+          path: /blogs/{blog_id}
+          method: get
+
+resources:
+  Resources:
+    blogs:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: blogs
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    blog_tags:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: tag_blogs
+        AttributeDefinitions:
+          - AttributeName: tag_id
+            AttributeType: S
+          - AttributeName: blog_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: tag_id
+            KeyType: HASH
+          - AttributeName: blog_id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    tags:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: tags
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

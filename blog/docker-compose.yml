@@ -1,0 +1,37 @@
+version: "3.2"
+
+services:
+  app:
+    build: offline
+    volumes:
+      - .:/app/blog
+      - ~/.aws:/root/.aws
+    working_dir: /app/blog
+    command: yarn run start
+    environment:
+      DDB_LOCAL_FQDN: "ddb-local"
+    # environment:
+    #   SLS_DEBUG: DEBUG
+    ports:
+      - 3000:3000
+    depends_on:
+      - ddb-local
+
+  ddb-local:
+    build: offline
+    working_dir: /app/ddb
+    volumes:
+      - "./serverless.yaml:/app/ddb/serverless.yaml"
+      - "./package.json:/app/ddb/package.json"
+      - "./offline:/app/ddb/offline"
+      - "./dynamodb_local_db:/dynamodb_local_db"
+    command: sh -c "yarn install && sls dynamodb install && sls dynamodb start --port 8000 --migrate --sharedDb --dbPath /dynamodb_local_db"
+    ports:
+      - 8000:8000
+
+      # - "./serverless.yml:/opt/dynamodb-local/serverless.yaml"
+      # - "./offline:/opt/dynamodb-local/offline"
+      # - "./dynamodb_local_db:/dynamodb_local_db"
+      # - "./package.json:/opt/dynamodb-local/package.json"
+      # - "./node_modules:/opt/dynamodb-local/node_modules"
+
